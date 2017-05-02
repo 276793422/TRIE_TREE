@@ -792,11 +792,12 @@ ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
 		//	如果父节点符合要求 \ 或者 /
 		if (TrieTree_IsLastWordIsSpecify(pTrieTree, pThis->parent->name))
 		{
-			//	当前存在规则，就出去
-			if (pThis->data != NULL)
-			{
-			}
-			pTmp = pThis;
+			////	当前存在规则，就出去
+			//if (pThis->data != NULL)
+			//{
+			//}
+			//	获取当前层的首个节点
+			pTmp = pThis->parent->subHead;
 			//	循环判断当前层是否有 L'\0'，
 			//	如果有，则认为当前 L'\0' 索引记录了当前目录对应的规则
 			//	目录规则优先级低于文件规则
