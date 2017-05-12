@@ -94,7 +94,7 @@ static PVOID TrieTree_DestroyData(PTRIE_TREE pTrieTree)
 {
 	if (pTrieTree->TrieFunc.DestroyData)
 	{
-		return pTrieTree->TrieFunc.DestroyData(pTrieTree);
+		return pTrieTree->TrieFunc.DestroyData(pTrieTree, &pTrieTree->poolData);
 	}
 	else
 	{
@@ -155,7 +155,7 @@ static PVOID TrieTree_DestroyNode(PTRIE_TREE pTrieTree)
 {
 	if (pTrieTree->TrieFunc.DestroyNode)
 	{
-		return pTrieTree->TrieFunc.DestroyNode(pTrieTree);
+		return pTrieTree->TrieFunc.DestroyNode(pTrieTree, &pTrieTree->poolNode);
 	}
 	else
 	{

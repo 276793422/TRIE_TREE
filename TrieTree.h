@@ -52,14 +52,14 @@ typedef unsigned short TRIE_INDEX;
 
 
 //	创建一个TRIE树，这个是基础，必须提供
-typedef PVOID (*TypeFunc_TrieTree_AllocTrieMemory)(ULONG uLen);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocTrieMemory)(ULONG uLen);
 
 //	销毁一个TRIE树，这个是基础，必须提供
-typedef PVOID (*TypeFunc_TrieTree_DestroyTrieMemory)(PVOID p);
+typedef PVOID (*ZooTypeFunc_TrieTree_DestroyTrieMemory)(PVOID p);
 
 //	创建一个DATA池，并且返回
 //		这个DATA池，是外面自己用的
-typedef PVOID (*TypeFunc_TrieTree_AllocDataPool)(PVOID pTrieTree);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocDataPool)(PVOID pTrieTree);
 
 //	DATA数据申请函数
 //		这里要做的事情是：
@@ -67,38 +67,38 @@ typedef PVOID (*TypeFunc_TrieTree_AllocDataPool)(PVOID pTrieTree);
 //		从 pool 这里面申请一块内存出来，
 //		申请出来内存之后，把data 拷贝进去，
 //		一系列都成功了，则返回申请的内存，否则返回NULL
-typedef PVOID (*TypeFunc_TrieTree_AllocData)(PVOID pTrieTree, PVOID pool, ULONG uLen, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocData)(PVOID pTrieTree, PVOID pool, ULONG uLen, PVOID data);
 
 //	DATA数据释放函数
 //		这里要做的事情是：
 //		从 pTrieTree->poolData 这里面，把 data 释放掉，
 //		释放成功了，返回NULL，否则仍然返回data
-typedef PVOID (*TypeFunc_TrieTree_FreeData)(PVOID pTrieTree, PVOID pool, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_FreeData)(PVOID pTrieTree, PVOID pool, PVOID data);
 
 //	销毁DATA pool
 //		这里要做的事情是：
 //		销毁释放整个 pTrieTree->poolData
-typedef PVOID (*TypeFunc_TrieTree_DestroyData)(PVOID pTrieTree);
+typedef PVOID (*ZooTypeFunc_TrieTree_DestroyData)(PVOID pTrieTree, PVOID *pool);
 
 //	创建一个NODE池，并且返回
 //		这个NODE池，是外面自己用的
-typedef PVOID (*TypeFunc_TrieTree_AllocNodePool)(PVOID pTrieTree);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocNodePool)(PVOID pTrieTree);
 
 //	NODE数据申请函数
 //		这里要做的事情是：
 //		根据 sizeof(TRIE_TREE_NODE) 的大小，
 //		从 pTrieTree->poolNode 这里面申请一块内存出来，
 //		申请成功，则返回申请的内存，否则返回NULL
-typedef PVOID (*TypeFunc_TrieTree_AllocNode)(PVOID pTrieTree, PVOID pool, ULONG uLen);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocNode)(PVOID pTrieTree, PVOID pool, ULONG uLen);
 
 //	NODE数据释放函数
 //		这里什么都不用做，就好了
-typedef PVOID (*TypeFunc_TrieTree_FreeNode)(PVOID pTrieTree, PVOID pool, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_FreeNode)(PVOID pTrieTree, PVOID pool, PVOID data);
 
 //	销毁NODE pool
 //		这里要做的事情是：
 //		销毁释放整个 pTrieTree->poolNode
-typedef PVOID (*TypeFunc_TrieTree_DestroyNode)(PVOID pTrieTree);
+typedef PVOID (*ZooTypeFunc_TrieTree_DestroyNode)(PVOID pTrieTree, PVOID *pool);
 
 //	当前函数用来在获取指定规则的时候，判断多层目录有多个规则的时候用哪个规则
 //	比如，树里有
@@ -113,30 +113,30 @@ typedef PVOID (*TypeFunc_TrieTree_DestroyNode)(PVOID pTrieTree);
 //	第二次：p 指向 D:\\1\\2\\ 的规则
 //	第三次：p 指向 D:\\1\\2\\3\\ 的规则
 //	第四次命中：p 指向 D:\\1\\2\\3\\4.c 的规则
-typedef ULONG (*TypeFunc_TrieTree_GetSpecifyRuleCmp)(PVOID pThis, WCHAR *wsKey, PVOID pParam, PVOID pData);
+typedef ULONG (*ZooTypeFunc_TrieTree_GetSpecifyRuleCmp)(PVOID pThis, WCHAR *wsKey, PVOID pParam, PVOID pData);
 
 //	内存设置函数，memset
-typedef PVOID (*TypeFunc_TrieTree_MemorySet)(PVOID pTrieTree, PVOID _Dst, ULONG _Val, ULONG _Size);
+typedef PVOID (*ZooTypeFunc_TrieTree_MemorySet)(PVOID pTrieTree, PVOID _Dst, ULONG _Val, ULONG _Size);
 
 
 typedef struct _TRIE_TREE_MEMORY_FUNCTION
 {
-	TypeFunc_TrieTree_AllocTrieMemory AllocTrieMemory;
-	TypeFunc_TrieTree_DestroyTrieMemory DestroyTrieMemory;
+	ZooTypeFunc_TrieTree_AllocTrieMemory AllocTrieMemory;
+	ZooTypeFunc_TrieTree_DestroyTrieMemory DestroyTrieMemory;
 
-	TypeFunc_TrieTree_AllocDataPool AllocDataPool;
-	TypeFunc_TrieTree_AllocData AllocData;
-	TypeFunc_TrieTree_FreeData FreeData;
-	TypeFunc_TrieTree_DestroyData DestroyData;
+	ZooTypeFunc_TrieTree_AllocDataPool AllocDataPool;
+	ZooTypeFunc_TrieTree_AllocData AllocData;
+	ZooTypeFunc_TrieTree_FreeData FreeData;
+	ZooTypeFunc_TrieTree_DestroyData DestroyData;
 
-	TypeFunc_TrieTree_AllocNodePool AllocNodePool;
-	TypeFunc_TrieTree_AllocNode AllocNode;
-	TypeFunc_TrieTree_FreeNode FreeNode;
-	TypeFunc_TrieTree_DestroyNode DestroyNode;
+	ZooTypeFunc_TrieTree_AllocNodePool AllocNodePool;
+	ZooTypeFunc_TrieTree_AllocNode AllocNode;
+	ZooTypeFunc_TrieTree_FreeNode FreeNode;
+	ZooTypeFunc_TrieTree_DestroyNode DestroyNode;
 
-	TypeFunc_TrieTree_MemorySet MemSet;
+	ZooTypeFunc_TrieTree_MemorySet MemSet;
 
-	TypeFunc_TrieTree_GetSpecifyRuleCmp GetSpecifyRuleCmp;
+	ZooTypeFunc_TrieTree_GetSpecifyRuleCmp GetSpecifyRuleCmp;
 }TRIE_TREE_MEMORY_FUNCTION, *PTRIE_TREE_MEMORY_FUNCTION;
 
 
