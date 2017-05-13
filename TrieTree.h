@@ -67,18 +67,18 @@ typedef PVOID (*ZooTypeFunc_TrieTree_AllocDataPool)(PVOID pTrieTree);
 //		从 pool 这里面申请一块内存出来，
 //		申请出来内存之后，把data 拷贝进去，
 //		一系列都成功了，则返回申请的内存，否则返回NULL
-typedef PVOID (*ZooTypeFunc_TrieTree_AllocData)(PVOID pTrieTree, PVOID pool, ULONG uLen, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocDataFromPool)(PVOID pTrieTree, PVOID pool, ULONG uLen, PVOID data);
 
 //	DATA数据释放函数
 //		这里要做的事情是：
 //		从 pTrieTree->poolData 这里面，把 data 释放掉，
 //		释放成功了，返回NULL，否则仍然返回data
-typedef PVOID (*ZooTypeFunc_TrieTree_FreeData)(PVOID pTrieTree, PVOID pool, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_FreeDataToPool)(PVOID pTrieTree, PVOID pool, PVOID data);
 
 //	销毁DATA pool
 //		这里要做的事情是：
 //		销毁释放整个 pTrieTree->poolData
-typedef PVOID (*ZooTypeFunc_TrieTree_DestroyData)(PVOID pTrieTree, PVOID *pool);
+typedef PVOID (*ZooTypeFunc_TrieTree_DestroyDataPool)(PVOID pTrieTree, PVOID *pool);
 
 //	创建一个NODE池，并且返回
 //		这个NODE池，是外面自己用的
@@ -89,16 +89,16 @@ typedef PVOID (*ZooTypeFunc_TrieTree_AllocNodePool)(PVOID pTrieTree);
 //		根据 sizeof(TRIE_TREE_NODE) 的大小，
 //		从 pTrieTree->poolNode 这里面申请一块内存出来，
 //		申请成功，则返回申请的内存，否则返回NULL
-typedef PVOID (*ZooTypeFunc_TrieTree_AllocNode)(PVOID pTrieTree, PVOID pool, ULONG uLen);
+typedef PVOID (*ZooTypeFunc_TrieTree_AllocNodeFromPool)(PVOID pTrieTree, PVOID pool, ULONG uLen);
 
 //	NODE数据释放函数
 //		这里什么都不用做，就好了
-typedef PVOID (*ZooTypeFunc_TrieTree_FreeNode)(PVOID pTrieTree, PVOID pool, PVOID data);
+typedef PVOID (*ZooTypeFunc_TrieTree_FreeNodeToPool)(PVOID pTrieTree, PVOID pool, PVOID data);
 
 //	销毁NODE pool
 //		这里要做的事情是：
 //		销毁释放整个 pTrieTree->poolNode
-typedef PVOID (*ZooTypeFunc_TrieTree_DestroyNode)(PVOID pTrieTree, PVOID *pool);
+typedef PVOID (*ZooTypeFunc_TrieTree_DestroyNodePool)(PVOID pTrieTree, PVOID *pool);
 
 //	当前函数用来在获取指定规则的时候，判断多层目录有多个规则的时候用哪个规则
 //	比如，树里有
@@ -121,22 +121,22 @@ typedef PVOID (*ZooTypeFunc_TrieTree_MemorySet)(PVOID pTrieTree, PVOID _Dst, ULO
 
 typedef struct _TRIE_TREE_MEMORY_FUNCTION
 {
-	ZooTypeFunc_TrieTree_AllocTrieMemory AllocTrieMemory;
-	ZooTypeFunc_TrieTree_DestroyTrieMemory DestroyTrieMemory;
+	ZooTypeFunc_TrieTree_AllocTrieMemory	AllocTrieMemory;
+	ZooTypeFunc_TrieTree_DestroyTrieMemory	DestroyTrieMemory;
 
-	ZooTypeFunc_TrieTree_AllocDataPool AllocDataPool;
-	ZooTypeFunc_TrieTree_AllocData AllocData;
-	ZooTypeFunc_TrieTree_FreeData FreeData;
-	ZooTypeFunc_TrieTree_DestroyData DestroyData;
+	ZooTypeFunc_TrieTree_AllocDataPool		AllocDataPool;
+	ZooTypeFunc_TrieTree_AllocDataFromPool	AllocDataFromPool;
+	ZooTypeFunc_TrieTree_FreeDataToPool		FreeDataToPool;
+	ZooTypeFunc_TrieTree_DestroyDataPool	DestroyDataPool;
 
-	ZooTypeFunc_TrieTree_AllocNodePool AllocNodePool;
-	ZooTypeFunc_TrieTree_AllocNode AllocNode;
-	ZooTypeFunc_TrieTree_FreeNode FreeNode;
-	ZooTypeFunc_TrieTree_DestroyNode DestroyNode;
+	ZooTypeFunc_TrieTree_AllocNodePool		AllocNodePool;
+	ZooTypeFunc_TrieTree_AllocNodeFromPool	AllocNodeFromPool;
+	ZooTypeFunc_TrieTree_FreeNodeToPool		FreeNodeToPool;
+	ZooTypeFunc_TrieTree_DestroyNodePool	DestroyNodePool;
 
-	ZooTypeFunc_TrieTree_MemorySet MemSet;
+	ZooTypeFunc_TrieTree_MemorySet			MemSet;
 
-	ZooTypeFunc_TrieTree_GetSpecifyRuleCmp GetSpecifyRuleCmp;
+	ZooTypeFunc_TrieTree_GetSpecifyRuleCmp	GetSpecifyRuleCmp;
 }TRIE_TREE_MEMORY_FUNCTION, *PTRIE_TREE_MEMORY_FUNCTION;
 
 
@@ -188,7 +188,7 @@ ULONG TrieTree_GetRule(PVOID pTrie, WCHAR *wsKey, PVOID *pv);
 //		这个查找也是个模糊查找，但是这里支持的是外部提供匹配函数来判断查找结果
 //		所以这里很可能支持多个结果
 //		具体情况看 TrieTree_GetSpecifyRuleCmpFunc 的定义
-ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID pParam);
+ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID *pParam);
 
 
 //	TrieTree 查找数据
@@ -203,7 +203,7 @@ ULONG TrieTree_GetRule_Right(PVOID pTrie, WCHAR *wsKey, PVOID *pv);
 //		所以这里很可能支持多个结果
 //		具体情况看 TrieTree_GetSpecifyRuleCmpFunc 的定义
 //		从右侧开始找
-ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID pParam);
+ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID *pParam);
 
 
 //	TrieTree 获取正在使用的node个数

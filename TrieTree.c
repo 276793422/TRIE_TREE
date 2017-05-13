@@ -55,11 +55,11 @@ static PVOID TrieTree_AllocDataPool(PTRIE_TREE pTrieTree)
 	}
 }
 
-static PVOID TrieTree_AllocData(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
+static PVOID TrieTree_AllocDataFromPool(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 {
-	if (pTrieTree->TrieFunc.AllocData)
+	if (pTrieTree->TrieFunc.AllocDataFromPool)
 	{
-		PVOID pv = pTrieTree->TrieFunc.AllocData(pTrieTree, pool, pTrieTree->uDataSize, data);
+		PVOID pv = pTrieTree->TrieFunc.AllocDataFromPool(pTrieTree, pool, pTrieTree->uDataSize, data);
 		if (pv)
 		{
 			pTrieTree->allocDataOnUse ++;
@@ -73,11 +73,15 @@ static PVOID TrieTree_AllocData(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 	}
 }
 
-static PVOID TrieTree_FreeData(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
+static PVOID TrieTree_FreeDataToPool(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 {
-	if (pTrieTree->TrieFunc.FreeData)
+	if (data == NULL)
 	{
-		PVOID pv = pTrieTree->TrieFunc.FreeData(pTrieTree, pool, data);
+		return NULL;
+	}
+	if (pTrieTree->TrieFunc.FreeDataToPool)
+	{
+		PVOID pv = pTrieTree->TrieFunc.FreeDataToPool(pTrieTree, pool, data);
 		if (pv == NULL)
 		{
 			pTrieTree->allocDataOnUse --;
@@ -90,11 +94,11 @@ static PVOID TrieTree_FreeData(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 	}
 }
 
-static PVOID TrieTree_DestroyData(PTRIE_TREE pTrieTree)
+static PVOID TrieTree_DestroyDataPool(PTRIE_TREE pTrieTree)
 {
-	if (pTrieTree->TrieFunc.DestroyData)
+	if (pTrieTree->TrieFunc.DestroyDataPool)
 	{
-		return pTrieTree->TrieFunc.DestroyData(pTrieTree, &pTrieTree->poolData);
+		return pTrieTree->TrieFunc.DestroyDataPool(pTrieTree, &pTrieTree->poolData);
 	}
 	else
 	{
@@ -116,11 +120,11 @@ static PVOID TrieTree_AllocNodePool(PTRIE_TREE pTrieTree)
 	}
 }
 
-static PVOID TrieTree_AllocNode(PTRIE_TREE pTrieTree, PVOID pool)
+static PVOID TrieTree_AllocNodeFromPool(PTRIE_TREE pTrieTree, PVOID pool)
 {
-	if (pTrieTree->TrieFunc.AllocNode)
+	if (pTrieTree->TrieFunc.AllocNodeFromPool)
 	{
-		PVOID pv = pTrieTree->TrieFunc.AllocNode(pTrieTree, pool, sizeof(TRIE_TREE_NODE));
+		PVOID pv = pTrieTree->TrieFunc.AllocNodeFromPool(pTrieTree, pool, sizeof(TRIE_TREE_NODE));
 		if (pv)
 		{
 			pTrieTree->allocNodeOnUse ++;
@@ -134,11 +138,11 @@ static PVOID TrieTree_AllocNode(PTRIE_TREE pTrieTree, PVOID pool)
 	}
 }
 
-static PVOID TrieTree_FreeNode(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
+static PVOID TrieTree_FreeNodeToPool(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 {
-	if (pTrieTree->TrieFunc.FreeNode)
+	if (pTrieTree->TrieFunc.FreeNodeToPool)
 	{
-		PVOID pv = pTrieTree->TrieFunc.FreeNode(pTrieTree, pool, data);
+		PVOID pv = pTrieTree->TrieFunc.FreeNodeToPool(pTrieTree, pool, data);
 		if (pv == NULL)
 		{
 			pTrieTree->allocNodeOnUse --;
@@ -151,11 +155,11 @@ static PVOID TrieTree_FreeNode(PTRIE_TREE pTrieTree, PVOID pool, PVOID data)
 	}
 }
 
-static PVOID TrieTree_DestroyNode(PTRIE_TREE pTrieTree)
+static PVOID TrieTree_DestroyNodePool(PTRIE_TREE pTrieTree)
 {
-	if (pTrieTree->TrieFunc.DestroyNode)
+	if (pTrieTree->TrieFunc.DestroyNodePool)
 	{
-		return pTrieTree->TrieFunc.DestroyNode(pTrieTree, &pTrieTree->poolNode);
+		return pTrieTree->TrieFunc.DestroyNodePool(pTrieTree, &pTrieTree->poolNode);
 	}
 	else
 	{
@@ -170,7 +174,7 @@ static PTRIE_TREE_NODE TrieTree_AllocSpace(PTRIE_TREE pTrieTree, PTRIE_TREE_NODE
 {
 	if (p == NULL)
 	{
-		p = TrieTree_AllocNode(pTrieTree, pTrieTree->poolNode);
+		p = TrieTree_AllocNodeFromPool(pTrieTree, pTrieTree->poolNode);
 		if (p == NULL)
 		{
 			return NULL;
@@ -202,7 +206,7 @@ ULONG TrieTree_Init(PVOID *pTrie, ULONG uDataSize, PTRIE_TREE_MEMORY_FUNCTION pF
 	{
 		return 0;
 	}
-	if (pFun->AllocNode == NULL)
+	if (pFun->AllocNodeFromPool == NULL)
 	{
 		return 0;
 	}
@@ -278,7 +282,7 @@ ULONG TrieTree_Insert(PVOID pTrie, WCHAR *wsKey, PVOID data)
 			{
 				break;
 			}
-			pthis->data = TrieTree_AllocData(pTrieTree, pTrieTree->poolData, data);
+			pthis->data = TrieTree_AllocDataFromPool(pTrieTree, pTrieTree->poolData, data);
 			bRet = 1;
 			break;
 		}
@@ -319,8 +323,8 @@ ULONG TrieTree_Revise(PVOID pTrie, WCHAR *wsKey, PVOID data)
 		//	只有 name 为 L'\0'的子节点，里面记录的才是正确信息
 		if (*wsKey == L'\0' && pThis->name == L'\0')
 		{
-			pThis->data = TrieTree_FreeData(pTrieTree, pTrieTree->poolData, pThis->data);
-			pThis->data = TrieTree_AllocData(pTrieTree, pTrieTree->poolData, data);
+			pThis->data = TrieTree_FreeDataToPool(pTrieTree, pTrieTree->poolData, pThis->data);
+			pThis->data = TrieTree_AllocDataFromPool(pTrieTree, pTrieTree->poolData, data);
 			bRet = 1;
 			break;
 		}
@@ -417,7 +421,7 @@ ULONG TrieTree_Delete(PVOID pTrie, WCHAR *wsKey)
 		//	只有 name 为 L'\0'的子节点，里面记录的才是正确信息
 		if (*wsKey == L'\0' && pThis->name == L'\0')
 		{
-			pThis->data = TrieTree_FreeData(pTrieTree, pTrieTree->poolData, pThis->data);
+			pThis->data = TrieTree_FreeDataToPool(pTrieTree, pTrieTree->poolData, pThis->data);
 			bRet = 1;
 			break;
 		}
@@ -527,7 +531,7 @@ ULONG TrieTree_GetRule(PVOID pTrie, WCHAR *wsKey, PVOID *pv)
 	return bRet;
 }
 
-ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
+ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID *pParam)
 {
 	PTRIE_TREE pTrieTree = (PTRIE_TREE)pTrie;
 	PTRIE_TREE_NODE pThis = pTrieTree->pTrieHead;
@@ -571,7 +575,7 @@ ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
 			if (pTmp && (pTmp->name == L'\0') && (pTmp->data != NULL))
 			{
 				//	当前层有规则，并且匹配成功了
-				if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, pParam, pTmp->data))
+				if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, *pParam, pTmp->data))
 				{
 					bRet = 1;
 					break;	
@@ -588,7 +592,7 @@ ULONG TrieTree_GetSpecifyRuleCmp(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
 				break;
 			}
 			//	最后一条规则，匹配成功
-			if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, pParam, pThis->data))
+			if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, *pParam, pThis->data))
 			{
 				bRet = 1;
 				break;	
@@ -726,7 +730,7 @@ ULONG TrieTree_GetRule_Right(PVOID pTrie, WCHAR *wsKey, PVOID *pdata)
 //		所以这里很可能支持多个结果
 //		具体情况看 TrieTree_GetSpecifyRuleCmpFunc 的定义
 //		这个查找是从右边开始找
-ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
+ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID *pParam)
 {
 	PTRIE_TREE pTrieTree = (PTRIE_TREE)pTrie;
 	PTRIE_TREE_NODE pThis = pTrieTree->pTrieHead;
@@ -776,8 +780,9 @@ ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
 	if (bRet)
 	{
 		//	最后一条规则，匹配成功
-		if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, pParam, pThis->data))
+		if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, *pParam, pThis->data))
 		{
+			*pParam = pThis->data;
 			return bRet;
 		}
 	}
@@ -815,8 +820,9 @@ ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID pParam)
 			if (pTmp && (pTmp->name == L'\0') && (pTmp->data != NULL))
 			{
 				//	判断当前规则
-				if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, pParam, pTmp->data))
+				if (pTrieTree->TrieFunc.GetSpecifyRuleCmp(pTrieTree, pwsKey, *pParam, pTmp->data))
 				{
+					*pParam = pThis->data;
 					bRet = 1;
 					break;
 				}
