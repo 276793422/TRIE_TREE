@@ -837,8 +837,8 @@ ULONG TrieTree_GetSpecifyRuleCmp_Right(PVOID pTrie, WCHAR *wsKey, PVOID *pParam)
 ULONG TrieTree_Destroy(PVOID *pTrie)
 {
 	PTRIE_TREE pTrieTree = (PTRIE_TREE)*pTrie;
-	pTrieTree->poolData = TrieTree_DestroyData(pTrieTree);
-	pTrieTree->poolNode = TrieTree_DestroyNode(pTrieTree);
+	pTrieTree->poolData = TrieTree_DestroyDataPool(pTrieTree);
+	pTrieTree->poolNode = TrieTree_DestroyNodePool(pTrieTree);
 	//pTrieTree->TrieFunc.MemSet(pTrieTree, pTrieTree, 0, sizeof(*pTrieTree));
 	if (pTrieTree->TrieFunc.DestroyTrieMemory(pTrieTree))
 	{
